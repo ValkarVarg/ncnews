@@ -1,14 +1,16 @@
-import * as React from 'react';
+import React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import { CardActionArea } from '@mui/material';
+import { Link } from 'react-router-dom';
 
-const ArticleCard = ({ title, image }) => {
+const ArticleCard = ({ title, image, article_id }) => {
+    
     return (
         <Card sx={{ maxWidth: 300 }}>
-          <CardActionArea>
+          <CardActionArea component={Link} to={`/article/${article_id}`}>
             <CardMedia
               component="img"
               height="150"
@@ -37,3 +39,4 @@ const ArticleCard = ({ title, image }) => {
 };
 
 export default ArticleCard;
+
