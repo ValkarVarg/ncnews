@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Typography, Paper, Grid, IconButton, Box, Alert } from "@mui/material";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import { Typography, Paper, Box, Alert, CircularProgress } from "@mui/material";
 import newsApi from "../api-calls/axios";
+import ArticleDetails from "./components/ArticleDetails";
+import CommentField from "./components/CommentField";
+import Comment from "./components/Comment";
 
-const Article = () => {
+
+const Article = ({ user }) => {
   const { article_id } = useParams();
   const [article, setArticle] = useState(null);
   const [comments, setComments] = useState(null);
   const [selected, setSelected] = useState(null);
   const [alert, setAlert] = useState(null);
+  const [newComment, setNewComment] = useState("");
+  const [commentError, setCommentError] = useState("");
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const handleClick = (value) => {
     let valueToIncrement = value;
@@ -50,6 +55,38 @@ const Article = () => {
       });
   };
 
+  const handleCommentChange = (event) => {
+    setNewComment(event.target.value);
+    if (event.target.value) {
+      setCommentError("");
+    }
+  };
+
+  const handleCommentSubmit = () => {
+    setSubmitAttempted(true);
+
+    if (!user) {
+      return;
+    }
+    if (!newComment.trim()) {
+      setCommentError("Comment cannot be blank");
+      return;
+    }
+
+    const commentToPost = { username: user.username, body: newComment };
+    newsApi
+      .post(`/articles/${article_id}/comments`, commentToPost)
+      .then(({ data }) => {
+        setComments((prevComments) => [data.comment, ...prevComments]);
+        setNewComment("");
+        setCommentError("");
+        setSubmitAttempted(false);
+      })
+      .catch((error) => {
+        console.error("Error posting comment:", error);
+      });
+  };
+
   useEffect(() => {
     if (article_id) {
       newsApi
@@ -73,97 +110,42 @@ const Article = () => {
   }, [article_id]);
 
   if (!article || !comments) {
-    return <Typography variant="body1">Loading...</Typography>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
     <>
-      {alert && <Alert severity="error">{alert}</Alert>}{" "}
-      <Paper elevation={1} sx={{ p: 2 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
-            <img
-              src={article.article_img_url}
-              alt={article.title}
-              style={{ width: "100%" }}
-            />
-          </Grid>
-          <Grid item xs={8} container direction="column">
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: "bold",
-                fontSize: { xs: "2rem", sm: "2.5rem" },
-                textAlign: "right",
-              }}
-            >
-              {article.title}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{ fontSize: "1rem", textAlign: "right" }}
-            >
-              Written by {article.author}
-            </Typography>
-            <Box mt={2} flexGrow={1}>
-              <Typography variant="body1">{article.content}</Typography>
-            </Box>
-            <Box mt={2} display="flex" justifyContent="flex-end">
-              <Box sx={{ position: "relative" }}>
-                <Paper elevation={1} sx={{ p: 1 }}>
-                  <Grid container spacing={1} alignItems="center">
-                    <Grid item>
-                      <IconButton onClick={() => handleClick(1)}>
-                        <ThumbUpIcon
-                          style={{ color: selected === 1 ? "blue" : "gray" }}
-                        />
-                      </IconButton>
-                    </Grid>
-                    <Grid item>
-                      <IconButton onClick={() => handleClick(-1)}>
-                        <ThumbDownIcon
-                          style={{ color: selected === -1 ? "red" : "gray" }}
-                        />
-                      </IconButton>
-                    </Grid>
-                    <Grid item sx={{ ml: "auto" }}>
-                      <Typography variant="body2">
-                        Score: {article.votes}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Paper>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+      {alert && <Alert severity="error">{alert}</Alert>}
+      <ArticleDetails article={article} handleClick={handleClick} selected={selected} />
       <Paper elevation={1} sx={{ p: 2, mt: 2 }}>
         <Typography variant="body1">{article.body}</Typography>
       </Paper>
-      <Typography variant="h4" sx={{ textAlign: "left" }}>
+      <Paper elevation={1} sx={{ p: 2, mt: 2 }}>
+        <CommentField
+          user={user}
+          newComment={newComment}
+          handleCommentChange={handleCommentChange}
+          handleCommentSubmit={handleCommentSubmit}
+          submitAttempted={submitAttempted}
+          commentError={commentError}
+        />
+      </Paper>
+      <Typography variant="h5" sx={{ fontWeight: "bold", textAlign: "left", mt: 2 }}>
         Comments:
       </Typography>
       {comments.map((comment) => (
-        <Paper key={comment.comment_id} sx={{ p: 2, mt: 2 }}>
-          <Typography>{comment.body}</Typography>
-          <Typography>{comment.author}</Typography>
-          <Grid container spacing={1} alignItems="center">
-            <Grid item>
-              <IconButton>
-                <ThumbUpIcon />
-              </IconButton>
-            </Grid>
-            <Grid item>
-              <IconButton>
-                <ThumbDownIcon />
-              </IconButton>
-            </Grid>
-            <Grid item sx={{ ml: "auto" }}>
-              <Typography variant="body2">Score: {comment.votes}</Typography>
-            </Grid>
-          </Grid>
-        </Paper>
+        <Comment key={comment.comment_id} comment={comment} />
       ))}
     </>
   );

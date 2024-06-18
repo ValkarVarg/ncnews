@@ -15,12 +15,12 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 
 const pages = ["Articles", "Post"];
-const settings = ["Login", "Logout"];
 
-function Navbar() {
+function Navbar({ user, setUser }) {
   const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [welcomeMessage, setWelcomeMessage] = React.useState(null);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -42,6 +42,33 @@ function Navbar() {
     handleCloseNavMenu();
     navigate(`/${page.toLowerCase()}`);
   };
+
+  const handleLogin = () => {
+    const newUser = {
+      username: "cooljmessy",
+      name: "Peter Messy",
+      avatar_url:
+        "https://vignette.wikia.nocookie.net/mrmen/images/1/1a/MR_MESSY_4A.jpg/revision/latest/scale-to-width-down/250?cb=20170730171002",
+    };
+    setUser(newUser);
+    setWelcomeMessage(`Welcome ${newUser.name.split(" ")[0]}!`);
+    setTimeout(() => setWelcomeMessage(newUser.username), 3000); // Change to username after 3 seconds
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setWelcomeMessage(null);
+  };
+
+  React.useEffect(() => {
+    if (user) {
+      setWelcomeMessage(`Welcome ${user.name.split(" ")[0]}!`);
+      const timer = setTimeout(() => setWelcomeMessage(user.username), 2000); 
+      return () => clearTimeout(timer);
+    } else {
+      setWelcomeMessage(null);
+    }
+  }, [user]);
 
   return (
     <AppBar position="fixed">
@@ -132,10 +159,22 @@ function Navbar() {
             ))}
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
+          <Box sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
+            {welcomeMessage && (
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "white",
+                  mr: 2,
+                  fontWeight: 500,
+                }}
+              >
+                {welcomeMessage}
+              </Typography>
+            )}
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="" src={user?.avatar_url || "/static/images/avatar/2.jpg"} />
               </IconButton>
             </Tooltip>
             <Menu
@@ -154,11 +193,15 @@ function Navbar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+              {user ? (
+                <MenuItem onClick={handleLogout}>
+                  <Typography textAlign="center">Logout</Typography>
                 </MenuItem>
-              ))}
+              ) : (
+                <MenuItem onClick={handleLogin}>
+                  <Typography textAlign="center">Login</Typography>
+                </MenuItem>
+              )}
             </Menu>
           </Box>
         </Toolbar>

@@ -8,13 +8,14 @@ import Article from "./routes/Article"
 
 
 function App() {
+  const [user, setUser] = useState(null)
   return (
     <BrowserRouter>
-      <Navbar />
+      <Navbar user={user} setUser={setUser}/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/articles" element={<Articles />} />
-        <Route path="/article/:article_id" element={<Article />} />
+        <Route path="/article/:article_id" element={<Article user={user}/>} />
       </Routes>
     </BrowserRouter>
   )
