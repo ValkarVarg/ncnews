@@ -87,6 +87,22 @@ const Article = ({ user }) => {
       });
   };
 
+  const handleDelete = (commentId) => {
+    const updatedComments = comments.filter((comment) => comment.comment_id !== commentId);
+    setComments(updatedComments);
+  
+    newsApi
+      .delete(`/comments/${commentId}`)
+      .then(() => {
+        console.log("Comment deleted successfully");
+      })
+      .catch((error) => {
+        console.error("Error deleting comment:", error);
+        setAlert("Error deleting comment. Please try again.");
+        setComments(comments);
+      });
+  };
+
   useEffect(() => {
     if (article_id) {
       newsApi
@@ -145,7 +161,7 @@ const Article = ({ user }) => {
         Comments:
       </Typography>
       {comments.map((comment) => (
-        <Comment key={comment.comment_id} comment={comment} />
+        <Comment key={comment.comment_id} comment={comment} user={user} handleDelete={handleDelete}/>
       ))}
     </>
   );
