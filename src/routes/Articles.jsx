@@ -1,5 +1,5 @@
 import * as React from "react";
-import ArticleCard from "./Article-card";
+import ArticleCard from "./components/Article-card";
 import { Grid, Container, CircularProgress, Box } from "@mui/material";
 import newsApi from "../api-calls/axios";
 
