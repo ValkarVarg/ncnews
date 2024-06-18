@@ -1,6 +1,6 @@
 import * as React from "react";
 import ArticleCard from "./components/Article-card";
-import { Grid, Container, CircularProgress, Box } from "@mui/material";
+import { Grid, Container, CircularProgress, Box, Typography } from "@mui/material";
 import newsApi from "../api-calls/axios";
 
 const Articles = () => {
@@ -30,6 +30,7 @@ const Articles = () => {
           height: '100vh',
         }}
       >
+        <Typography>Please be patient, API loading</Typography>
         <CircularProgress />
       </Box>
     );
