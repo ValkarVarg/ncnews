@@ -6,7 +6,6 @@ import ArticleDetails from "./components/ArticleDetails";
 import CommentField from "./components/CommentField";
 import Comment from "./components/Comment";
 
-
 const Article = ({ user }) => {
   const { article_id } = useParams();
   const [article, setArticle] = useState(null);
@@ -63,28 +62,29 @@ const Article = ({ user }) => {
   };
 
   const handleCommentSubmit = () => {
-    setSubmitAttempted(true);
-
-    if (!user) {
-      return;
-    }
-    if (!newComment.trim()) {
-      setCommentError("Comment cannot be blank");
-      return;
-    }
-
-    const commentToPost = { username: user.username, body: newComment };
-    newsApi
-      .post(`/articles/${article_id}/comments`, commentToPost)
-      .then(({ data }) => {
-        setComments((prevComments) => [data.comment, ...prevComments]);
-        setNewComment("");
-        setCommentError("");
-        setSubmitAttempted(false);
-      })
-      .catch((error) => {
-        console.error("Error posting comment:", error);
-      });
+    return new Promise((resolve, reject) => {
+      setSubmitAttempted(true);
+  
+      if (!user) {
+        reject(new Error("User not logged in"));
+        return;
+      }
+      if (!newComment.trim()) {
+        reject(new Error("Comment cannot be blank"));
+        return;
+      }
+  
+      const commentToPost = { username: user.username, body: newComment };
+      newsApi
+        .post(`/articles/${article_id}/comments`, commentToPost)
+        .then(({ data }) => {
+          setComments((prevComments) => [data.comment, ...prevComments]);
+          resolve(); 
+        })
+        .catch((error) => {
+          reject(error); 
+        });
+    });
   };
 
   const handleDelete = (commentId) => {
@@ -99,7 +99,7 @@ const Article = ({ user }) => {
       .catch((error) => {
         console.error("Error deleting comment:", error);
         setAlert("Error deleting comment. Please try again.");
-        setComments(comments);
+        setComments(comments); 
       });
   };
 
@@ -143,7 +143,11 @@ const Article = ({ user }) => {
   return (
     <>
       {alert && <Alert severity="error">{alert}</Alert>}
-      <ArticleDetails article={article} handleClick={handleClick} selected={selected} />
+      <ArticleDetails
+        article={article}
+        handleClick={handleClick}
+        selected={selected}
+      />
       <Paper elevation={1} sx={{ p: 2, mt: 2 }}>
         <Typography variant="body1">{article.body}</Typography>
       </Paper>
@@ -151,17 +155,27 @@ const Article = ({ user }) => {
         <CommentField
           user={user}
           newComment={newComment}
+          setNewComment={setNewComment}
           handleCommentChange={handleCommentChange}
           handleCommentSubmit={handleCommentSubmit}
           submitAttempted={submitAttempted}
           commentError={commentError}
+          setCommentError={setCommentError}
         />
       </Paper>
-      <Typography variant="h5" sx={{ fontWeight: "bold", textAlign: "left", mt: 2 }}>
+      <Typography
+        variant="h5"
+        sx={{ fontWeight: "bold", textAlign: "left", mt: 2 }}
+      >
         Comments:
       </Typography>
       {comments.map((comment) => (
-        <Comment key={comment.comment_id} comment={comment} user={user} handleDelete={handleDelete}/>
+        <Comment
+          key={comment.comment_id}
+          comment={comment}
+          user={user}
+          handleDelete={handleDelete}
+        />
       ))}
     </>
   );
