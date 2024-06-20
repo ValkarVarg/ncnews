@@ -45,6 +45,7 @@ const CommentField = ({
   return (
     <>
       <TextField
+        name="commentInput"
         fullWidth
         multiline
         label="Add a Comment"

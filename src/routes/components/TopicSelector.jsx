@@ -38,14 +38,14 @@ const TopicSelector = () => {
 
   return (
     <FormControl fullWidth margin='normal'>
-      <InputLabel variant="standard" htmlFor="uncontrolled-native">
+      <InputLabel variant="standard" htmlFor="topic-selector">
         Topic
       </InputLabel>
       <NativeSelect
         value={selectedTopic}
         inputProps={{
           name: 'topics',
-          id: 'uncontrolled-native',
+          id: 'topic-selector',
         }}
         onChange={handleChange}
       >

@@ -17,14 +17,14 @@ const OrderBy = () => {
 
   return (
     <FormControl fullWidth margin='normal'>
-      <InputLabel variant="standard" htmlFor="uncontrolled-native">
+      <InputLabel variant="standard" htmlFor="order-selector">
         Order
       </InputLabel>
       <NativeSelect
         value={selectedOrder} 
         inputProps={{
           name: 'order',
-          id: 'uncontrolled-native',
+          id: 'order-selector',
         }}
         onChange={handleChange}
       >

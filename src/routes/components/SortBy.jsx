@@ -17,14 +17,14 @@ const SortBy = () => {
 
   return (
     <FormControl fullWidth margin='normal'>
-      <InputLabel variant="standard" htmlFor="uncontrolled-native">
+      <InputLabel variant="standard" htmlFor="sort-selector">
         Sort By
       </InputLabel>
       <NativeSelect
         value={selectedSort}
         inputProps={{
           name: 'sort',
-          id: 'uncontrolled-native',
+          id: 'sort-selector',
         }}
         onChange={handleChange}
       >
