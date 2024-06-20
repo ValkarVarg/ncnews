@@ -7,7 +7,7 @@ const SortBy = () => {
   const location = useLocation();
 
   const searchParams = new URLSearchParams(location.search);
-  const selectedSort = searchParams.get("sort")
+  const selectedSort = searchParams.get("sort") || "created_at"
 
   const handleChange = (event) => {
     const selectedSort = event.target.value;

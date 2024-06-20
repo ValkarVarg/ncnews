@@ -1,5 +1,5 @@
-import * as React from "react";
-import { useLocation } from 'react-router-dom';
+import React, {useState} from "react";
+import { useLocation, useNavigate } from 'react-router-dom';
 import ArticleCard from "./components/ArticleCard";
 import TopicSelector from "./components/TopicSelector";
 import SortBy from "./components/SortBy";
@@ -11,10 +11,12 @@ import {
   Typography,
 } from "@mui/material";
 import newsApi from "../api-calls/axios";
+import ErrorPage from "./components/ErrorPage";
 
 const Articles = () => {
-  const [articles, setArticles] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const location = useLocation();
 
   React.useEffect(() => {
@@ -33,8 +35,13 @@ const Articles = () => {
       .catch((err) => {
         console.log(err);
         setLoading(false);
+        setError("Articles not found. Please check queries are valid.");
       });
   }, [location.search]);
+
+  if (error) {
+    return <ErrorPage message={error} />;
+  }
 
   if (loading) {
     return (
