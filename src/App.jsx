@@ -5,6 +5,7 @@ import Home from "./routes/Home";
 import Navbar from "./routes/Navbar";
 import Articles from "./routes/Articles"
 import Article from "./routes/Article"
+import ErrorPage from './routes/components/ErrorPage';
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/article/:article_id" element={<Article user={user}/>} />
+        <Route path="*" element={<ErrorPage message="Page not found. Please check the URL and try again." />} />
       </Routes>
     </BrowserRouter>
   )

@@ -5,6 +5,7 @@ import newsApi from "../api-calls/axios";
 import ArticleDetails from "./components/ArticleDetails";
 import CommentField from "./components/CommentField";
 import Comment from "./components/Comment";
+import ErrorPage from "./components/ErrorPage";
 
 const Article = ({ user }) => {
   const { article_id } = useParams();
@@ -15,6 +16,7 @@ const Article = ({ user }) => {
   const [newComment, setNewComment] = useState("");
   const [commentError, setCommentError] = useState("");
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleClick = (value) => {
     let valueToIncrement = value;
@@ -64,7 +66,7 @@ const Article = ({ user }) => {
   const handleCommentSubmit = () => {
     return new Promise((resolve, reject) => {
       setSubmitAttempted(true);
-  
+
       if (!user) {
         reject(new Error("User not logged in"));
         return;
@@ -73,16 +75,16 @@ const Article = ({ user }) => {
         reject(new Error("Comment cannot be blank"));
         return;
       }
-  
+
       const commentToPost = { username: user.username, body: newComment };
       newsApi
         .post(`/articles/${article_id}/comments`, commentToPost)
         .then(({ data }) => {
           setComments((prevComments) => [data.comment, ...prevComments]);
-          resolve(); 
+          resolve();
         })
         .catch((error) => {
-          reject(error); 
+          reject(error);
         });
     });
   };
@@ -90,8 +92,8 @@ const Article = ({ user }) => {
   const handleDelete = (commentId) => {
     const updatedComments = comments.filter((comment) => comment.comment_id !== commentId);
     setComments(updatedComments);
-  
-    newsApi
+
+    return newsApi
       .delete(`/comments/${commentId}`)
       .then(() => {
         console.log("Comment deleted successfully");
@@ -99,7 +101,8 @@ const Article = ({ user }) => {
       .catch((error) => {
         console.error("Error deleting comment:", error);
         setAlert("Error deleting comment. Please try again.");
-        setComments(comments); 
+        setComments((prevComments) => [...prevComments, comments.find(comment => comment.comment_id === commentId)]);
+        throw error;
       });
   };
 
@@ -112,6 +115,7 @@ const Article = ({ user }) => {
         })
         .catch((error) => {
           console.error("Error fetching article:", error);
+          setError("Article not found. Please check the URL and try again.");
         });
 
       newsApi
@@ -121,9 +125,14 @@ const Article = ({ user }) => {
         })
         .catch((error) => {
           console.error("Error fetching comments:", error);
+          setError("Failed to fetch comments.");
         });
     }
   }, [article_id]);
+
+  if (error) {
+    return <ErrorPage message={error} />;
+  }
 
   if (!article || !comments) {
     return (
