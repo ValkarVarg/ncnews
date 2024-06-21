@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ArticleCard from "./components/ArticleCard";
 import TopicSelector from "./components/TopicSelector";
 import SortBy from "./components/SortBy";
@@ -18,6 +18,8 @@ const Articles = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [topics, setTopics] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -32,24 +34,35 @@ const Articles = () => {
   }, []);
 
   useEffect(() => {
+    const fetchArticles = () => {
+      const searchParams = new URLSearchParams(location.search);
+      const topic = searchParams.get('topic');
+      const sort_by = searchParams.get('sort');
+      const order = searchParams.get('order');
+      
+      setLoading(true);
+      newsApi
+        .get("/articles", { params: { topic, sort_by, order, limit: 20000, p:1 } })
+        .then(({ data }) => {
+          setArticles(data.articles);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoading(false);
+          setError("Articles not found. Please check queries are valid.");
+        });
+    };
+
+    fetchArticles();
+  }, [location.search, selectedTopic]); 
+
+  const handleTopicChange = (topic) => {
+    setSelectedTopic(topic); 
     const searchParams = new URLSearchParams(location.search);
-    const topic = searchParams.get('topic');
-    const sort_by = searchParams.get('sort');
-    const order = searchParams.get('order');
-    
-    setLoading(true);
-    newsApi
-      .get("/articles", { params: { topic, sort_by, order, limit: 20000, p:1 } })
-      .then(({ data }) => {
-        setArticles(data.articles);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-        setError("Articles not found. Please check queries are valid.");
-      });
-  }, [location.search]);
+    searchParams.set('topic', topic);
+    navigate(`${location.pathname}?${searchParams.toString()}`);
+  };
 
   if (error) {
     return <ErrorPage message={error} />;
@@ -76,10 +89,11 @@ const Articles = () => {
       <Box sx={{ paddingTop: { xs: '64px', sm: '56px' } }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" margin="normal">
           <TopicSelector
+            selectedTopic={selectedTopic}
             topics={topics}
             setTopics={setTopics} 
             showAddTopicOption={false}
-          />
+            onTopicChange={handleTopicChange}/>
           <SortBy />
           <OrderBy />
         </Box>
