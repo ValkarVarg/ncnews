@@ -17,6 +17,7 @@ const Post = ({ user }) => {
   const [selectedTopic, setSelectedTopic] = useState("");
   const [newTopicName, setNewTopicName] = useState("");
   const [newTopicDescription, setNewTopicDescription] = useState("");
+  const [newArticleId, setNewArticleId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [alert, setAlert] = useState(null);
@@ -121,13 +122,14 @@ const Post = ({ user }) => {
     }
 
     try {
-      await newsApi.post("/articles", newArticle);
+      const updatedArticle = await newsApi.post("/articles", newArticle);
       setAlert("Article posted successfully.");
       setTitle("");
       setBody("");
       setSelectedTopic("");
       setImageUrl("");
       setImagePreviewUrl("");
+      setNewArticleId(updatedArticle.article_id);
     } catch (error) {
       console.error("Error posting article:", error);
       setAlert("Failed to post article. Please try again.");
@@ -153,7 +155,11 @@ const Post = ({ user }) => {
           {alert}
         </Alert>
       )}
-      <Typography variant="h5" component="h1" sx={{ fontWeight: "bold", mb: 4 }}>
+      <Typography
+        variant="h5"
+        component="h1"
+        sx={{ fontWeight: "bold", mb: 4 }}
+      >
         Post a New Article
       </Typography>
       {alert && !alert.includes("successfully") && (
@@ -162,7 +168,7 @@ const Post = ({ user }) => {
         </Alert>
       )}
       <TopicSelector
-        topics={topics} 
+        topics={topics}
         selectedTopic={selectedTopic}
         onTopicChange={handleTopicChange}
         onNewTopicNameChange={handleNewTopicNameChange}
@@ -175,17 +181,7 @@ const Post = ({ user }) => {
         setTopicLoading={setTopicLoading}
         setTopics={setTopics}
       />
-      {alert && alert.includes("successfully") && (
-        <Box mt={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            href={`/articles/${newArticleId}`}
-          >
-            Go to Article
-          </Button>
-        </Box>
-      )}
+
       <form onSubmit={handleSubmit}>
         <Box sx={{ mb: 2 }}>
           <TextField
@@ -230,15 +226,26 @@ const Post = ({ user }) => {
             />
           </Box>
         )}
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          disabled={loading || topicLoading}
-          sx={{ mt: 2 }}
-        >
-          {loading ? "Posting..." : "Post Article"}
-        </Button>
+        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={loading || topicLoading}
+            sx={{ mr: 2 }}
+          >
+            {loading ? "Posting..." : "Post Article"}
+          </Button>
+          {alert && alert.includes("successfully") && (
+            <Button
+              variant="contained"
+              color="primary"
+              href={`/articles/${newArticleId}`}
+            >
+              Go to Article
+            </Button>
+          )}
+        </Box>
       </form>
     </Paper>
   );
