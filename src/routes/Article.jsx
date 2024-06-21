@@ -38,16 +38,6 @@ const Article = ({ user }) => {
   useEffect(() => {
     if (article_id) {
       newsApi
-        .get(`/articles/${article_id}`)
-        .then(({ data }) => {
-          setArticle(data.article);
-        })
-        .catch((error) => {
-          console.error("Error fetching article:", error);
-          setError("Article not found. Please check the URL and try again.");
-        });
-
-      newsApi
         .get(`/articles/${article_id}/comments`)
         .then(({ data }) => {
           setComments(data.comments);
@@ -55,6 +45,16 @@ const Article = ({ user }) => {
         .catch((error) => {
           console.error("Error fetching comments:", error);
           setError("Failed to fetch comments.");
+        });
+
+      newsApi
+        .get(`/articles/${article_id}`)
+        .then(({ data }) => {
+          setArticle(data.article);
+        })
+        .catch((error) => {
+          console.error("Error fetching article:", error);
+          setError("Article not found. Please check the URL and try again.");
         });
     }
   }, [article_id]);
