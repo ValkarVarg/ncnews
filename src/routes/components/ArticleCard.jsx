@@ -25,10 +25,10 @@ const ArticleCard = ({ title, image, article_id }) => {
                 sx={{
                     fontWeight: 'bold',
                     fontSize: {
-                      xs: '0.7rem', 
-                      sm: '0.8rem',
-                      md: '0.9em',
-                      lg: '1rem', 
+                      xs: '0.8rem', 
+                      sm: '0.9rem',
+                      md: '1rem',
+                      lg: '1.1rem', 
                     },
                     overflow: 'hidden', 
                     textOverflow: 'ellipsis', 

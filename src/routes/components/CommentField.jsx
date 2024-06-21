@@ -79,6 +79,7 @@ const CommentField = ({
         }}
       />
       <Snackbar
+      name="commentSuccessIndicator"
         open={submissionStatus === "success" || submissionStatus === "error"}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}

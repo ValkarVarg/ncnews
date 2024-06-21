@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 import ArticleCard from "./components/ArticleCard";
 import TopicSelector from "./components/TopicSelector";
 import SortBy from "./components/SortBy";
@@ -17,13 +17,25 @@ const Articles = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [topics, setTopics] = useState([]); // Add topics state
   const location = useLocation();
 
-  React.useEffect(() => {
+  useEffect(() => {
+    newsApi
+      .get("/topics")
+      .then(({ data }) => {
+        setTopics(data.topics);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const topic = searchParams.get('topic');
     const sort_by = searchParams.get('sort');
-    const order = searchParams.get('order')
+    const order = searchParams.get('order');
     
     setLoading(true);
     newsApi
@@ -53,8 +65,8 @@ const Articles = () => {
           height: "100vh",
         }}
       >
-        <Typography>Please be patient, API loading</Typography>
-        <CircularProgress />
+        <Typography>Please be patient - Data loading</Typography>
+        <CircularProgress sx={{ ml: 2 }} />
       </Box>
     );
   }
@@ -62,11 +74,15 @@ const Articles = () => {
   return (
     <div>
       <Box sx={{ paddingTop: { xs: '64px', sm: '56px' } }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" margin="normal">
-      <TopicSelector />
-      <SortBy />
-      <OrderBy />
-      </Box>
+        <Box display="flex" justifyContent="space-between" alignItems="center" margin="normal">
+          <TopicSelector
+            topics={topics} // Pass topics to TopicSelector
+            setTopics={setTopics} // Pass setTopics to TopicSelector
+            showAddTopicOption={false} // Disable "Add a Topic" option
+          />
+          <SortBy />
+          <OrderBy />
+        </Box>
         <Container>
           <Box 
             sx={{
