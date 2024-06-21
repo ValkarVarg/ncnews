@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { TextField, Button, Paper, Typography, Box, Alert } from "@mui/material";
 import newsApi from "../api-calls/axios";
 import TopicSelector from "./components/TopicSelector";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 const Post = ({ user }) => {
   const [title, setTitle] = useState("");
@@ -16,9 +16,9 @@ const Post = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [topicLoading, setTopicLoading] = useState(false);
   const [topics, setTopics] = useState([]);
-  const [newArticleId, setNewArticleId] = useState(null); // Add state for new article ID
+  const [newArticleId, setNewArticleId] = useState(null); 
 
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (imageUrl) {
@@ -70,7 +70,13 @@ const Post = ({ user }) => {
       setAlert("Topic name and description are required.");
       return;
     }
-    setTopicLoading(true);
+  
+    const existingTopic = topics.find(topic => topic.slug.toLowerCase() === newTopicName.toLowerCase());
+    if (existingTopic) {
+      setAlert(`Topic '${newTopicName}' already exists.`);
+      return;
+    }
+  
     try {
       const response = await newsApi.post("/topics", {
         slug: newTopicName,
@@ -85,8 +91,6 @@ const Post = ({ user }) => {
     } catch (error) {
       console.error("Error adding new topic:", error.response);
       setAlert("Failed to add new topic. Please try again.");
-    } finally {
-      setTopicLoading(false);
     }
   };
 
