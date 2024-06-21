@@ -17,7 +17,7 @@ const Articles = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [topics, setTopics] = useState([]); // Add topics state
+  const [topics, setTopics] = useState([]);
   const location = useLocation();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const Articles = () => {
     
     setLoading(true);
     newsApi
-      .get("/articles", { params: { topic, sort_by, order } })
+      .get("/articles", { params: { topic, sort_by, order, limit: 20000, p:1 } })
       .then(({ data }) => {
         setArticles(data.articles);
         setLoading(false);
@@ -76,9 +76,9 @@ const Articles = () => {
       <Box sx={{ paddingTop: { xs: '64px', sm: '56px' } }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" margin="normal">
           <TopicSelector
-            topics={topics} // Pass topics to TopicSelector
-            setTopics={setTopics} // Pass setTopics to TopicSelector
-            showAddTopicOption={false} // Disable "Add a Topic" option
+            topics={topics}
+            setTopics={setTopics} 
+            showAddTopicOption={false}
           />
           <SortBy />
           <OrderBy />

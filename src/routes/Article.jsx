@@ -6,7 +6,6 @@ import {
   Box,
   Alert,
   CircularProgress,
-  IconButton,
   Dialog,
   DialogActions,
   DialogContent,
@@ -19,7 +18,6 @@ import ArticleDetails from "./components/ArticleDetails";
 import CommentField from "./components/CommentField";
 import Comment from "./components/Comment";
 import ErrorPage from "./components/ErrorPage";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 const Article = ({ user }) => {
   const { article_id } = useParams();

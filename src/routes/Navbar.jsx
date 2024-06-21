@@ -52,7 +52,7 @@ function Navbar({ user, setUser }) {
     };
     setUser(newUser);
     setWelcomeMessage(`Welcome ${newUser.name.split(" ")[0]}!`);
-    setTimeout(() => setWelcomeMessage(newUser.username), 3000); // Change to username after 3 seconds
+    setTimeout(() => setWelcomeMessage(newUser.username), 3000); 
   };
 
   const handleLogout = () => {

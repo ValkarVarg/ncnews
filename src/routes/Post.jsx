@@ -162,7 +162,7 @@ const Post = ({ user }) => {
         </Alert>
       )}
       <TopicSelector
-        topics={topics} // Pass topics state to TopicSelector
+        topics={topics} 
         selectedTopic={selectedTopic}
         onTopicChange={handleTopicChange}
         onNewTopicNameChange={handleNewTopicNameChange}
@@ -173,13 +173,13 @@ const Post = ({ user }) => {
         topicLoading={topicLoading}
         handleNewTopicSubmit={handleNewTopicSubmit}
         setTopicLoading={setTopicLoading}
+        setTopics={setTopics}
       />
       {alert && alert.includes("successfully") && (
         <Box mt={2}>
           <Button
             variant="contained"
             color="primary"
-            // Assuming newArticleId is defined somewhere in your component
             href={`/articles/${newArticleId}`}
           >
             Go to Article
