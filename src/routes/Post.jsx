@@ -1,43 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { TextField, Button, Paper, Typography, Box, Alert } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Paper,
+  Typography,
+  Box,
+  Alert,
+  Container,
+} from "@mui/material";
 import newsApi from "../api-calls/axios";
 import TopicSelector from "./components/TopicSelector";
-import { useNavigate } from "react-router-dom";
 
 const Post = ({ user }) => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [selectedTopic, setSelectedTopic] = useState(""); 
-  const [newTopicName, setNewTopicName] = useState(""); 
-  const [newTopicDescription, setNewTopicDescription] = useState(""); 
-  const [imageUrl, setImageUrl] = useState(""); 
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [newTopicName, setNewTopicName] = useState("");
+  const [newTopicDescription, setNewTopicDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(false);
   const [topicLoading, setTopicLoading] = useState(false);
   const [topics, setTopics] = useState([]);
-  const [newArticleId, setNewArticleId] = useState(null); 
-
-  const navigate = useNavigate();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (imageUrl) {
-      setImagePreviewUrl(imageUrl);
-    } else {
-      setImagePreviewUrl("");
-    }
-  }, [imageUrl]);
-
-  useEffect(() => {
-    newsApi
-      .get("/topics")
-      .then(({ data }) => {
-        setTopics(data.topics);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    fetchTopics();
   }, []);
+
+  const fetchTopics = async () => {
+    try {
+      const response = await newsApi.get("/topics");
+      const { data } = response;
+      setTopics(data.topics);
+    } catch (error) {
+      console.error("Error fetching topics:", error);
+      setError("Failed to fetch topics. Please try again.");
+    }
+  };
 
   const handleTitleChange = (event) => {
     setTitle(event.target.value);
@@ -62,7 +63,7 @@ const Post = ({ user }) => {
   const handleImageUrlChange = (event) => {
     const url = event.target.value;
     setImageUrl(url);
-    setImagePreviewUrl(url); 
+    setImagePreviewUrl(url);
   };
 
   const handleNewTopicSubmit = async (addTopic) => {
@@ -70,14 +71,17 @@ const Post = ({ user }) => {
       setAlert("Topic name and description are required.");
       return;
     }
-  
-    const existingTopic = topics.find(topic => topic.slug.toLowerCase() === newTopicName.toLowerCase());
+
+    const existingTopic = topics.find(
+      (topic) => topic.slug.toLowerCase() === newTopicName.toLowerCase()
+    );
     if (existingTopic) {
       setAlert(`Topic '${newTopicName}' already exists.`);
       return;
     }
-  
+
     try {
+      setTopicLoading(true);
       const response = await newsApi.post("/topics", {
         slug: newTopicName,
         description: newTopicDescription,
@@ -91,6 +95,8 @@ const Post = ({ user }) => {
     } catch (error) {
       console.error("Error adding new topic:", error.response);
       setAlert("Failed to add new topic. Please try again.");
+    } finally {
+      setTopicLoading(false);
     }
   };
 
@@ -115,25 +121,18 @@ const Post = ({ user }) => {
     }
 
     try {
-      const { data } = await newsApi.post("/articles", newArticle);
+      await newsApi.post("/articles", newArticle);
       setAlert("Article posted successfully.");
       setTitle("");
       setBody("");
-      setSelectedTopic(""); 
-      setImageUrl(""); 
+      setSelectedTopic("");
+      setImageUrl("");
       setImagePreviewUrl("");
-      setNewArticleId(data.article.article_id);
     } catch (error) {
       console.error("Error posting article:", error);
       setAlert("Failed to post article. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoToArticle = () => {
-    if (newArticleId) {
-      navigate(`/article/${newArticleId}`);
     }
   };
 
@@ -149,10 +148,44 @@ const Post = ({ user }) => {
 
   return (
     <Paper elevation={1} sx={{ p: 4, mt: 10 }}>
+      {alert && alert.includes("successfully") && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {alert}
+        </Alert>
+      )}
       <Typography variant="h5" component="h1" sx={{ fontWeight: "bold", mb: 4 }}>
         Post a New Article
       </Typography>
-
+      {alert && !alert.includes("successfully") && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {alert}
+        </Alert>
+      )}
+      <TopicSelector
+        topics={topics} // Pass topics state to TopicSelector
+        selectedTopic={selectedTopic}
+        onTopicChange={handleTopicChange}
+        onNewTopicNameChange={handleNewTopicNameChange}
+        onNewTopicDescriptionChange={handleNewTopicDescriptionChange}
+        newTopicName={newTopicName}
+        newTopicDescription={newTopicDescription}
+        loading={loading}
+        topicLoading={topicLoading}
+        handleNewTopicSubmit={handleNewTopicSubmit}
+        setTopicLoading={setTopicLoading}
+      />
+      {alert && alert.includes("successfully") && (
+        <Box mt={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            // Assuming newArticleId is defined somewhere in your component
+            href={`/articles/${newArticleId}`}
+          >
+            Go to Article
+          </Button>
+        </Box>
+      )}
       <form onSubmit={handleSubmit}>
         <Box sx={{ mb: 2 }}>
           <TextField
@@ -190,30 +223,13 @@ const Post = ({ user }) => {
             <Typography variant="body2" sx={{ mb: 1 }}>
               Image Preview:
             </Typography>
-            <img src={imagePreviewUrl} alt="Image Preview" style={{ maxWidth: "100%", height: "auto" }} />
+            <img
+              src={imagePreviewUrl}
+              alt="Image Preview"
+              style={{ maxWidth: "100%", height: "auto" }}
+            />
           </Box>
         )}
-        <Box sx={{ mb: 2 }}>
-          <TopicSelector
-            topics={topics}
-            setTopics={setTopics} 
-            selectedTopic={selectedTopic}
-            onTopicChange={handleTopicChange}
-            onNewTopicNameChange={handleNewTopicNameChange}
-            onNewTopicDescriptionChange={handleNewTopicDescriptionChange}
-            newTopicName={newTopicName}
-            newTopicDescription={newTopicDescription}
-            loading={loading}
-            topicLoading={topicLoading}
-            handleNewTopicSubmit={handleNewTopicSubmit}
-          />
-        </Box>
-        {alert && (
-        <Alert severity={alert.includes("successfully") ? "success" : "error"} sx={{ mb: 2 }}>
-          {alert}
-        </Alert>
-      )}
-        <Box>
         <Button
           type="submit"
           variant="contained"
@@ -223,19 +239,7 @@ const Post = ({ user }) => {
         >
           {loading ? "Posting..." : "Post Article"}
         </Button>
-        {newArticleId && (
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleGoToArticle}
-          sx={{ mt: 2, ml: 2 }}
-        >
-          Go to Article
-        </Button>
-      )}
-        </Box>
       </form>
-     
     </Paper>
   );
 };
