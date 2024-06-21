@@ -1,8 +1,9 @@
 import React from "react";
-import { Typography, Paper, Grid, Box } from "@mui/material";
+import { Typography, Paper, Grid, Box, IconButton } from "@mui/material";
 import VoteButtons from "./VoteButtons";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-const ArticleDetails = ({ article, handleClick, selected }) => (
+const ArticleDetails = ({ article, handleClick, selected, handleArticleDelete, user }) => (
   <Paper elevation={1} sx={{ p: 2, mt: 10 }}>
     <Grid container spacing={2}>
       <Grid item xs={5}>
@@ -18,7 +19,17 @@ const ArticleDetails = ({ article, handleClick, selected }) => (
         <Box mt={2} flexGrow={1}>
           <Typography variant="body1">{article.content}</Typography>
         </Box>
-        <Box mt={2} display="flex" justifyContent="flex-end">
+        <Box mt={2} display="flex" justifyContent="space-between" alignItems="center">
+          {user && user.username === article.author && (
+            <Paper>
+            <IconButton
+              sx={{ ":focus": { outline: "none" } }}
+              onClick={handleArticleDelete}
+            >
+              <DeleteIcon />
+            </IconButton>
+            </Paper>
+          )}
           <VoteButtons selected={selected} votes={article.votes} handleClick={handleClick} />
         </Box>
       </Grid>
